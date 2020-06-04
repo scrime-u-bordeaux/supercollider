@@ -23,3 +23,6 @@
 [submodule "external_libraries/link"]
 	path = external_libraries/link
 	url = https://github.com/Ableton/link
+[submodule "external_libraries/mongoose"]
+	path = external_libraries/mongoose
+	url = https://github.com/cesanta/mongoose.git
