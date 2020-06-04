@@ -88,7 +88,9 @@ const int ivxNetAddr_PortID = 1;
 // const int ivxNetAddr_Hostname = 2; // unused
 const int ivxNetAddr_Socket = 3;
 
-static int makeSynthMsgWithTags(big_scpacket* packet, PyrSlot* slots, int size);
+int makeSynthMsgWithTags(big_scpacket* packet, PyrSlot* slots, int size);
+
+
 
 int makeSynthBundle(big_scpacket* packet, PyrSlot* slots, int size, bool useElapsed);
 
@@ -200,7 +202,7 @@ static int addMsgSlotWithTags(big_scpacket* packet, PyrSlot* slot) {
     return errNone;
 }
 
-static int makeSynthMsgWithTags(big_scpacket* packet, PyrSlot* slots, int size) {
+int makeSynthMsgWithTags(big_scpacket* packet, PyrSlot* slots, int size) {
     packet->BeginMsg();
 
     // First component: OSC Address Pattern.

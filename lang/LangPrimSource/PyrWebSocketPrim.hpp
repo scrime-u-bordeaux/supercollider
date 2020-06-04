@@ -13,7 +13,7 @@
 #include <thread>
 #include <atomic>
 
-#include "../dependencies/mongoose/mongoose.h"
+#include "../../external_libraries/mongoose/mongoose.h"
 
 using pyrslot   = PyrSlot;
 using pyrobject = PyrObject;

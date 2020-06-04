@@ -43,6 +43,7 @@
 #include "PyrArchiverT.h"
 #include "PyrDeepCopier.h"
 #include "PyrDeepFreezer.h"
+#include "PyrWebSocketPrim.hpp"
 //#include "Wacom.h"
 #include "InitAlloc.h"
 #include "SC_AudioDevicePrim.hpp"
@@ -4259,6 +4260,8 @@ void initPrimitives() {
     definePrimitive(base, index++, "_RoutineReset", prRoutineReset, 1, 0);
     definePrimitive(base, index++, "_RoutineYieldAndReset", prRoutineYieldAndReset, 2, 0);
     definePrimitive(base, index++, "_RoutineStop", prRoutineStop, 1, 0);
+	
+    wsclang::initialize();
 
     //	definePrimitive(base, index++, "_IsDemo", prIsDemo, 1, 0);
     definePrimitive(base, index++, "_Blork", prBlork, 1, 0);
