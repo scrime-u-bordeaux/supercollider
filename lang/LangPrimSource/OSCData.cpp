@@ -574,7 +574,7 @@ static PyrInt8Array* MsgToInt8Array(sc_msg_iter& msg, bool runGC) {
 
 static const double dInfinity = std::numeric_limits<double>::infinity();
 
-static PyrObject* ConvertOSCMessage(int inSize, char* inData) {
+PyrObject* ConvertOSCMessage(int inSize, char* inData) {
     char* cmdName = inData;
     int cmdNameLen = OSCstrlen(cmdName);
     sc_msg_iter msg(inSize - cmdNameLen, inData + cmdNameLen);
