@@ -4260,8 +4260,6 @@ void initPrimitives() {
     definePrimitive(base, index++, "_RoutineReset", prRoutineReset, 1, 0);
     definePrimitive(base, index++, "_RoutineYieldAndReset", prRoutineYieldAndReset, 2, 0);
     definePrimitive(base, index++, "_RoutineStop", prRoutineStop, 1, 0);
-	
-    wsclang::initialize();
 
     //	definePrimitive(base, index++, "_IsDemo", prIsDemo, 1, 0);
     definePrimitive(base, index++, "_Blork", prBlork, 1, 0);
@@ -4389,8 +4387,10 @@ void initPrimitives() {
 #endif
 
     initSCDocPrimitives();
-
-    s_recvmsg = getsym("receiveMsg");
+	
+	wsclang::initialize();
+    
+	s_recvmsg = getsym("receiveMsg");
     post("\tFound %d primitives.\n", nextPrimitiveIndex());
 }
 
