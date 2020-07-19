@@ -85,18 +85,21 @@ public:
 class Connection : public Object
 {
 public:
-    mg_connection* mgc = nullptr;
-
     Connection(mg_connection* cn) :
-        mgc(cn) {}
+        m_mgc(cn) {}
+
+    void set_mgc(mg_connection* mgc) { m_mgc = mgc; }
+    mg_connection* mgc() const { return m_mgc; }
 
     bool operator==(Connection const& rhs) {
-        return mgc == rhs.mgc;
+        return m_mgc == rhs.m_mgc;
     }
 
     bool operator==(mg_connection* rhs) {
-        return mgc == rhs;
+        return m_mgc == rhs;
     }
+private:
+    mg_connection* m_mgc = nullptr;
 };
 
 /// Associates mg http_message with a sclang object

@@ -28,10 +28,12 @@ WebSocketConnection
 		^super.new;
 	}
 
+	// from WebSocketServer
 	*newInit { |ptr|
 		^this.newCopyArgs(ptr).prmBind();
 	}
 
+	// from WebSocketClient, when connected
 	initialize { |ptr|
 		m_ptr = ptr;
 		this.prmBind();
@@ -327,9 +329,8 @@ WebSocketServer
 	}
 
 	pvOnNewConnection { |con|
-		var connection = WebSocketConnection.newInit(con);
-		m_connections = m_connections.add(connection);
-		m_ncb.value(connection)
+		m_connections = m_connections.add(WebSocketConnection.newInit(con));
+		m_ncb.value(m_connections.last());
 	}
 
 	pvOnHttpRequestReceived { |request|

@@ -431,6 +431,7 @@ void Server::initialize()
     }
     mg_set_protocol_http_websocket(connection);
     m_running = true;
+    m_connections.reserve(8);
     m_mgthread = std::thread(&Server::poll, this);
 }
 
@@ -477,8 +478,8 @@ void Server::ws_event_handler(mg_connection* mgc, int event, void* data)
         break;
     }
     case MG_EV_WEBSOCKET_HANDSHAKE_DONE: {
-        Connection c(mgc);
-        server->m_connections.push_back(c);
+//        Connection c(mgc);
+        server->m_connections.emplace_back(mgc);
         // at this point, the pyrobject has not been set
         //it will have to go through the "bind" primitive call first
         wsclang::interpret(server->object(), &server->m_connections.back(),
@@ -541,9 +542,9 @@ void Client::connect(std::string const& host, uint16_t port)
     ws_addr.append(host);
     ws_addr.append(":");
     ws_addr.append(std::to_string(port));
-    m_connection.mgc = mg_connect_ws(&m_mginterface, ws_event_handler,
-                           ws_addr.c_str(), nullptr, nullptr);
-    assert(m_connection.mgc); //for now
+    m_connection.set_mgc(mg_connect_ws(&m_mginterface, ws_event_handler,
+                           ws_addr.c_str(), nullptr, nullptr));
+    assert(m_connection.mgc()); //for now
     m_running = true;
     m_thread = std::thread(&Client::poll, this);
 }
@@ -596,6 +597,7 @@ void Client::ws_event_handler(mg_connection* mgc, int event, void* data)
     }   
     case MG_EV_WEBSOCKET_FRAME: {
         auto wm = static_cast<websocket_message*>(data);
+        scpostn_mg("(client) received frame");
         parse_websocket_frame(wm, client->m_connection.object());
         break;
     }
@@ -608,7 +610,7 @@ void Client::ws_event_handler(mg_connection* mgc, int event, void* data)
     }
     case MG_EV_CLOSE: {
         if (client->m_running && mgc->flags & MG_F_IS_WEBSOCKET) {
-            client->m_connection.mgc = nullptr;
+            client->m_connection.set_mgc(nullptr);
             wsclang::interpret(client->object(), "pvOnDisconnected");
         }
     }
@@ -624,8 +626,8 @@ pyr_ws_con_bind(vmglobals* g, int)
     // write address/port in sc object
     int port;
     char addr[32], s_port[8];    
-    mg_sock_addr_to_str(&nc->mgc->sa, addr, sizeof(addr), MG_SOCK_STRINGIFY_IP);
-    mg_sock_addr_to_str(&nc->mgc->sa, s_port, sizeof(s_port), MG_SOCK_STRINGIFY_PORT);
+    mg_sock_addr_to_str(&nc->mgc()->sa, addr, sizeof(addr), MG_SOCK_STRINGIFY_IP);
+    mg_sock_addr_to_str(&nc->mgc()->sa, s_port, sizeof(s_port), MG_SOCK_STRINGIFY_PORT);
     port = std::stoi(s_port);
     wsclang::varwrite(g->sp, std::string(addr), 1);
     wsclang::varwrite<int>(g->sp, port, 2);
@@ -639,8 +641,7 @@ pyr_ws_con_write_text(vmglobals* g, int)
 {
     auto nc = wsclang::varread<Connection*>(g->sp-1, 0);
     auto text = wsclang::read<std::string>(g->sp);    
-    scpostn_mg("websocket text out: %s", text.data());
-    mg_send_websocket_frame(nc->mgc, WEBSOCKET_OP_TEXT,
+    mg_send_websocket_frame(nc->mgc(), WEBSOCKET_OP_TEXT,
                             text.c_str(), text.size());
     return errNone;
 }
@@ -665,9 +666,7 @@ pyr_ws_con_write_osc(vmglobals* g, int n)
     int err = makeSynthMsgWithTags(&packet, aslot, n);
     if (err != errNone)
         return err;
-    // still don't know why there's a 4bytes padding before the uri...
-    // this is a temporary workaround
-    mg_send_websocket_frame(connection->mgc, WEBSOCKET_OP_BINARY,
+    mg_send_websocket_frame(connection->mgc(), WEBSOCKET_OP_BINARY,
                             packet.data(), packet.size());
     return errNone;
 }
